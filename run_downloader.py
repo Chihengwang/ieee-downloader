@@ -36,13 +36,15 @@ class IeeeDownloader:
         print("begin crawling!!!")
         paper_list = self.browser.find_elements_by_css_selector('div.List-results-items')
         print("totally ",len(paper_list))
-        base_link='http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber='
+        # base_link='http://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&arnumber='
         # deal with data
         for paper in paper_list:
             paper_info={}
-            download_link=paper.find_element_by_xpath("//*[@data-artnum]")
-            artnum=download_link.get_attribute('data-artnum')
-            paper_info['link']=base_link+str(artnum)
+            # download_link=paper.find_element_by_xpath("//*[@data-artnum]")
+            # artnum=download_link.get_attribute('data-artnum')
+            download_link=paper.find_element_by_class_name('u-flex-display-flex').find_element_by_tag_name("a").get_attribute('href')
+            # print(str(download_link).encode("utf8").decode("cp950", "ignore"))
+            paper_info['link']=download_link
             title=paper.find_element_by_tag_name("h2").text
             paper_info['title']=str(title).encode("utf8").decode("cp950", "ignore")
             authors=paper.find_element_by_class_name('author').text
