@@ -12,6 +12,7 @@ class IeeeDownloader:
        self.year_range = year_range
        self.browser=webdriver.Chrome() # 驅動chrome
        self.paper_elements=[]
+       self.time=0
     def run_crawl(self):
         self.base="https://ieeexplore.ieee.org/search/searchresult.jsp?"
         self.querystring=self.base+"queryText="+urllib.parse.quote(self.search_name)+"&highlight=true&returnFacets=ALL&returnType=SEARCH&ranges="+self.year_range+"_Year"
@@ -21,6 +22,7 @@ class IeeeDownloader:
         js = 'window.scrollTo(0, document.body.scrollHeight);'
         self.browser.execute_script(js)
         load_btn = "//button[@class='loadMore-btn']"
+        print("Begin clicking!!!")
         while(1):
             try:
                 # Insert your scraping action here
@@ -29,6 +31,9 @@ class IeeeDownloader:
                 time.sleep(7)
                 js = 'window.scrollTo(0, document.body.scrollHeight);'
                 self.browser.execute_script(js)
+                self.time=self.time+1
+                if self.time>20:
+                    break
             except NoSuchElementException:
                 print("Done finding button")
                 break
@@ -42,7 +47,12 @@ class IeeeDownloader:
             paper_info={}
             # download_link=paper.find_element_by_xpath("//*[@data-artnum]")
             # artnum=download_link.get_attribute('data-artnum')
-            download_link=paper.find_element_by_class_name('u-flex-display-flex').find_element_by_tag_name("a").get_attribute('href')
+            # download_link=paper.find_element_by_class_name('u-flex-display-flex').find_element_by_tag_name("a").get_attribute('href')
+            try:
+                # Insert your scraping action here
+                download_link=paper.find_element_by_class_name('u-flex-display-flex').find_element_by_tag_name("a").get_attribute('href')
+            except NoSuchElementException:
+                download_link="None"
             # print(str(download_link).encode("utf8").decode("cp950", "ignore"))
             paper_info['link']=download_link
             title=paper.find_element_by_tag_name("h2").text
@@ -50,10 +60,18 @@ class IeeeDownloader:
             authors=paper.find_element_by_class_name('author').text
             paper_info['authors']=str(authors).encode("utf8").decode("cp950", "ignore")
             # print(authors.encode("utf8").decode("cp950", "ignore"))
-            conference=paper.find_element_by_class_name('description').find_element_by_tag_name("a").text
+            # conference=paper.find_element_by_class_name('description').find_element_by_tag_name("a").text
+            try:
+                conference=paper.find_element_by_class_name('description').find_element_by_tag_name("a").text
+            except NoSuchElementException:
+                conference="None"
             paper_info['conference']=str(conference).encode("utf8").decode("cp950", "ignore")
             # print(conference.encode("utf8").decode("cp950", "ignore"))
             publisher_info_container=paper.find_element_by_class_name('publisher-info-container').text
+            try:
+                publisher_info_container=paper.find_element_by_class_name('publisher-info-container').text
+            except NoSuchElementException:
+                publisher_info_container="None|None"
             paper_info['publisher-info']=publisher_info_container
             year=publisher_info_container.split('|')[0]
             year=str(year).encode("utf8").decode("cp950", "ignore")
